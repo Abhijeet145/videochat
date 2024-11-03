@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+#videos{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap:2em;
+  margin: 2em;
+}
+
+.video-player{
+  background-color: black;
+  width: 100%;
+  height: 300px;
+}
