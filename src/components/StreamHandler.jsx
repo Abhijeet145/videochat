@@ -3,7 +3,7 @@ import AgoraRTM from "agora-rtm-sdk"
 let first=true
 
 const StreamHandler = () => {
-
+    
     const servers = {
         iceServers : [
             {
@@ -28,6 +28,7 @@ const StreamHandler = () => {
     const members = new Map([])
     let memberCount = 1
     const maxUsers = 5
+    const audioval = true
     //  //later need to create a roomID to get from user
     let roomID = 'Test room 2'
 
@@ -35,7 +36,7 @@ const StreamHandler = () => {
     let remoteStream
     let peerConnection
     let init = async()=>{
-          
+        window.addEventListener('beforeunload',leaveChannel)
         // Create a client instance 
         client = await AgoraRTM.createInstance(APP_ID)
         
@@ -50,20 +51,23 @@ const StreamHandler = () => {
 
         channel.on('MemberLeft' , handleUserLeft)
 
-        localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+        localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true})
         document.getElementById('user-1').srcObject = localStream
 
     }
 
     let leaveChannel = async()=>{
+        console.log("Leave channel was called")
+        members.forEach(member=>{
+            client.sendMessageToPeer({text:JSON.stringify({'type':'Leaving'}),member})
+        })
         await channel.leaveChannel()
         await client.logout()
     }
-
+    
     let initialize=()=>{
         if(first===true){
             first = false
-            window.addEventListener('beforeunload',leaveChannel)
             init()
         }
     }
@@ -86,13 +90,23 @@ const StreamHandler = () => {
             createAnswer(MemberId, message.offer,memberCount)
         }
     
-        if(message.type === 'answer'){
+        else if(message.type === 'answer'){
             addAnswer(message.answer)
         }
     
-        if(message.type === 'candidate'){
+        else if(message.type === 'candidate'){
             if(peerConnection){
                 peerConnection.addIceCandidate(message.candidate)
+            }
+        }
+        else if(message.type === 'Leaving'){
+            console.log("Leaving was called")
+            for(let i = 2;i<=maxUsers;i++){
+                if(members.get(MemberId) === i){
+                    document.getElementById(`user-${i}`).style.display = 'none'
+                    memIds.add(i)//when user leaves add this as a potential user
+                    members.delete(MemberId)
+                }
             }
         }
     
@@ -131,7 +145,7 @@ const StreamHandler = () => {
         console.log('I am adding remote stream');
 
         if(!localStream){
-            localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+            localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:audioval})
             document.getElementById('user-1').srcObject = localStream
         }
 
