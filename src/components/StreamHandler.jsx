@@ -4,18 +4,18 @@ let first=true
 
 const StreamHandler = () => {
     
-    const servers = {
-        iceServers : [
-            {
-                urls: [
-                    "stun:stun.l.google.com:19302",
-                    "stun:stun.l.google.com:5349",
-                    "stun:stun1.l.google.com:3478",
-                    "stun:stun1.l.google.com:5349",
-                ]
-            }  
-        ]
-    }
+    // const servers = {
+    //     iceServers : [
+    //         {
+    //             urls: [
+    //                 "stun:stun.l.google.com:19302",
+    //                 "stun:stun.l.google.com:5349",
+    //                 "stun:stun1.l.google.com:3478",
+    //                 "stun:stun1.l.google.com:5349",
+    //             ]
+    //         }  
+    //     ]
+    // }
     
     let APP_ID = "e996accb35234d22bf92922376441efb"
     let token = null
@@ -138,7 +138,7 @@ const StreamHandler = () => {
     }
 
     let createPeerConnectoion = async(MemberId,memberCount)=>{
-        peerConnection = new RTCPeerConnection(servers)
+        peerConnection = new RTCPeerConnection()
 
         //handle the remote stream
         remoteStream = new MediaStream()
@@ -153,14 +153,14 @@ const StreamHandler = () => {
         }
 
         //Adds all the tracks to peerConnection
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track,localStream)
+        localStream.getTracks().forEach( async track => {
+            await peerConnection.addTrack(track,localStream)
         })
         console.log("Tracks added to localstream");
 
         peerConnection.ontrack = (event)=>{
-            event.streams[0].getTracks().forEach(track=>{
-                remoteStream.addTrack(track)
+            event.streams[0].getTracks().forEach(async track=>{
+                await remoteStream.addTrack(track)
             })
         }
         // let inboundStream = null;
