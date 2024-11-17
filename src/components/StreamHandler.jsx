@@ -28,11 +28,12 @@ const StreamHandler = () => {
     const members = new Map([])
     let memberCount = 1
     const maxUsers = 5
-    const audioval = true
+    const audioVal = false
     //  //later need to create a roomID to get from user
     let roomID = 'Test room 2'
 
     let localStream
+    let localVideoStream
     let remoteStream
     let peerConnection
     let init = async()=>{
@@ -51,8 +52,9 @@ const StreamHandler = () => {
 
         channel.on('MemberLeft' , handleUserLeft)
 
-        localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true})
-        document.getElementById('user-1').srcObject = localStream
+        localVideoStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+        localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:audioVal})
+        document.getElementById('user-1').srcObject = localVideoStream
 
     }
 
@@ -145,8 +147,9 @@ const StreamHandler = () => {
         console.log('I am adding remote stream');
 
         if(!localStream){
-            localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:audioval})
-            document.getElementById('user-1').srcObject = localStream
+            localVideoStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+            localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:audioVal})
+            document.getElementById('user-1').srcObject = localVideoStream
         }
 
         //Adds all the tracks to peerConnection
@@ -159,8 +162,21 @@ const StreamHandler = () => {
             event.streams[0].getTracks().forEach(track=>{
                 remoteStream.addTrack(track)
             })
-            console.log(event.streams[0]);
         }
+        // let inboundStream = null;
+
+        // peerConnection.ontrack = (ev) => {
+        // if (ev.streams && ev.streams[0]) {
+        //     remoteStream.srcObject = ev.streams[0];
+        // } else {
+        //     if (!inboundStream) {
+        //         inboundStream = new MediaStream();
+        //         remoteStream.srcObject = inboundStream;
+        //         }
+        //         inboundStream.addTrack(ev.track);
+        //     }
+        // };
+
 
         peerConnection.onicecandidate = async (event)=>{
             if(event.candidate){
