@@ -4,18 +4,18 @@ let first=true
 
 const StreamHandler = () => {
     
-    // const servers = {
-    //     iceServers : [
-    //         {
-    //             urls: [
-    //                 "stun:stun.l.google.com:19302",
-    //                 "stun:stun.l.google.com:5349",
-    //                 "stun:stun1.l.google.com:3478",
-    //                 "stun:stun1.l.google.com:5349",
-    //             ]
-    //         }  
-    //     ]
-    // }
+    const servers = {
+        iceServers : [
+            {
+                urls: [
+                    "stun:stun.l.google.com:19302",
+                    "stun:stun.l.google.com:5349",
+                    "stun:stun1.l.google.com:3478",
+                    "stun:stun1.l.google.com:5349",
+                ]
+            }  
+        ]
+    }
     
     let APP_ID = "e996accb35234d22bf92922376441efb"
     let token = null
@@ -28,7 +28,7 @@ const StreamHandler = () => {
     const members = new Map([])
     let memberCount = 1
     const maxUsers = 5
-    const audioVal = false
+    const audioVal = true
     //  //later need to create a roomID to get from user
     let roomID = 'Test room 2'
 
@@ -163,20 +163,6 @@ const StreamHandler = () => {
                 await remoteStream.addTrack(track)
             })
         }
-        // let inboundStream = null;
-
-        // peerConnection.ontrack = (ev) => {
-        // if (ev.streams && ev.streams[0]) {
-        //     remoteStream.srcObject = ev.streams[0];
-        // } else {
-        //     if (!inboundStream) {
-        //         inboundStream = new MediaStream();
-        //         remoteStream.srcObject = inboundStream;
-        //         }
-        //         inboundStream.addTrack(ev.track);
-        //     }
-        // };
-
 
         peerConnection.onicecandidate = async (event)=>{
             if(event.candidate){
