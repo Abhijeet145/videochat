@@ -26,7 +26,7 @@ const StreamHandler = () => {
     let channel
     const memIds = new Set([2,3,4,5])
     const members = new Map([])
-    let memberCount = 1
+    let memberNumber = 1
     const maxUsers = 5
     const audioVal = true
     //  //later need to create a roomID to get from user
@@ -34,8 +34,8 @@ const StreamHandler = () => {
 
     let localStream
     let localVideoStream
-    let remoteStream
-    let peerConnection
+    let remoteStream = new Map([])
+    let peerConnection = new Map([])
     let init = async()=>{
         window.addEventListener('beforeunload',leaveChannel)
         // Create a client instance 
@@ -83,22 +83,22 @@ const StreamHandler = () => {
         if(message.type === 'offer'){
             for(let i=2;i<=maxUsers;i++){
                 if(memIds.has(i) === true){
-                    memberCount = i;
+                    memberNumber = i;
                     memIds.delete(i);//delete this user
                     break;
                 }
             }
-            members.set(MemberId,memberCount)
-            createAnswer(MemberId, message.offer,memberCount)
+            members.set(MemberId,memberNumber)
+            createAnswer(MemberId, message.offer,memberNumber)
         }
     
         else if(message.type === 'answer'){
-            addAnswer(message.answer)
+            addAnswer(message.answer,MemberId)
         }
     
         else if(message.type === 'candidate'){
-            if(peerConnection){
-                peerConnection.addIceCandidate(message.candidate)
+            if(peerConnection.get(MemberId)){
+                peerConnection.get(MemberId).addIceCandidate(message.candidate)
             }
         }
         else if(message.type === 'Leaving'){
@@ -117,14 +117,14 @@ const StreamHandler = () => {
     let handleUserJoined = async (MemberId)=>{
         for(let i=2;i<=maxUsers;i++){
             if(memIds.has(i) === true){
-                memberCount = i;
+                memberNumber = i;
                 memIds.delete(i);//delete this user
                 break;
             }
         }
-        members.set(MemberId,memberCount)
+        members.set(MemberId,memberNumber)
         console.log('A new user joined this channel: ',MemberId)
-        createOffer(MemberId,memberCount)
+        createOffer(MemberId,memberNumber)
     }
 
     let handleUserLeft = async (MemberId)=>{
@@ -137,13 +137,15 @@ const StreamHandler = () => {
         }
     }
 
-    let createPeerConnectoion = async(MemberId,memberCount)=>{
-        peerConnection = new RTCPeerConnection(servers)
+    let createPeerConnectoion = async(MemberId,memberNumber)=>{
+        let connection = new RTCPeerConnection(servers)
+        peerConnection.set(MemberId,connection)
 
         //handle the remote stream
-        remoteStream = new MediaStream()
-        document.getElementById(`user-${memberCount}`).srcObject = remoteStream
-        document.getElementById(`user-${memberCount}`).style.display = 'block'
+        let stream = new MediaStream()
+        remoteStream.set(MemberId,stream)
+        document.getElementById(`user-${memberNumber}`).srcObject = stream
+        document.getElementById(`user-${memberNumber}`).style.display = 'block'
         console.log('I am adding remote stream');
 
         if(!localStream){
@@ -154,17 +156,17 @@ const StreamHandler = () => {
 
         //Adds all the tracks to peerConnection
         localStream.getTracks().forEach( async track => {
-            await peerConnection.addTrack(track,localStream)
+            await connection.addTrack(track,localStream)
         })
         console.log("Tracks added to localstream");
 
-        peerConnection.ontrack = (event)=>{
+        connection.ontrack = (event)=>{
             event.streams[0].getTracks().forEach(async track=>{
-                await remoteStream.addTrack(track)
+                await stream.addTrack(track)
             })
         }
 
-        peerConnection.onicecandidate = async (event)=>{
+        connection.onicecandidate = async (event)=>{
             if(event.candidate){
                 await client.sendMessageToPeer({text:JSON.stringify({'type':'candidate','candidate':event.candidate})},MemberId)
             }
@@ -172,13 +174,13 @@ const StreamHandler = () => {
        
     }
 
-    let createOffer = async(MemberId,memberCount)=>{
-        await createPeerConnectoion(MemberId,memberCount)
+    let createOffer = async(MemberId,memberNumber)=>{
+        await createPeerConnectoion(MemberId,memberNumber)
 
         console.log('connection established successfully')
 
-        let offer = await peerConnection.createOffer()
-        await peerConnection.setLocalDescription(offer)
+        let offer = await peerConnection.get(MemberId).createOffer()
+        await peerConnection.get(MemberId).setLocalDescription(offer)
         console.log('Offer created')
 
         client.sendMessageToPeer({text:JSON.stringify({'type':'offer','offer':offer})},MemberId)
@@ -186,20 +188,20 @@ const StreamHandler = () => {
     }
 
 
-    let createAnswer = async(MemberId,offer,memberCount)=>{
-        await createPeerConnectoion(MemberId,memberCount)
+    let createAnswer = async(MemberId,offer,memberNumber)=>{
+        await createPeerConnectoion(MemberId,memberNumber)
 
-        await peerConnection.setRemoteDescription(offer)
+        await peerConnection.get(MemberId).setRemoteDescription(offer)
 
-        let answer = await peerConnection.createAnswer()
-        await peerConnection.setLocalDescription(answer)
+        let answer = await peerConnection.get(MemberId).createAnswer()
+        await peerConnection.get(MemberId).setLocalDescription(answer)
         
         client.sendMessageToPeer({text:JSON.stringify({'type':'answer','answer':answer})},MemberId)
     }
 
-    let addAnswer = async(answer)=>{
-        if(!peerConnection.currentRemoteDescription){
-            peerConnection.setRemoteDescription(answer)
+    let addAnswer = async(answer,MemberId)=>{
+        if(!peerConnection.get(MemberId).currentRemoteDescription){
+            peerConnection.get(MemberId).setRemoteDescription(answer)
         }
     }
 
