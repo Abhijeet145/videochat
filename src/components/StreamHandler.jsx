@@ -138,7 +138,7 @@ const StreamHandler = () => {
     }
 
     let createPeerConnectoion = async(MemberId,memberCount)=>{
-        peerConnection = new RTCPeerConnection()
+        peerConnection = new RTCPeerConnection(servers)
 
         //handle the remote stream
         remoteStream = new MediaStream()
