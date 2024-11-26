@@ -57,3 +57,44 @@ video {
 #user-2,#user-3,#user-4,#user-5{
   display: none;
 }
+
+/* General Dark Theme Styling */
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.container-fluid {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 100vh;
+  width: 100vw; 
+  padding: 0;
+}
+
+#videos {
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  gap: 10px; /* Gap between videos */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.video-player {
+  background-color: black;
+  border: 2px solid #333;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  object-fit: cover;
+  transform: scaleX(-1);
+  width: 40%
+  
+}

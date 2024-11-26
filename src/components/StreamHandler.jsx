@@ -146,7 +146,7 @@ const StreamHandler = () => {
         remoteStream.set(MemberId,stream)
         document.getElementById(`user-${memberNumber}`).srcObject = stream
         document.getElementById(`user-${memberNumber}`).style.display = 'block'
-        console.log('I am adding remote stream');
+        // console.log('I am adding remote stream');
 
         if(!localStream){
             localVideoStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false})
