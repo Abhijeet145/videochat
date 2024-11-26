@@ -4,7 +4,7 @@ function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer>
-      <p>Copyright ⓒ {year} NIT CSE</p>
+      <p>Made with love in NITT CSE</p>
     </footer>
   );
 }

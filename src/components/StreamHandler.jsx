@@ -1,9 +1,13 @@
 import React from "react"
 import AgoraRTM from "agora-rtm-sdk"
+import { useLocation } from "react-router"
+import { useNavigate } from "react-router"
 let first=true
 
 const StreamHandler = () => {
-    
+    const navigate = useNavigate();
+    const {state} = useLocation();
+    const { RoomId } = state; 
     const servers = {
         iceServers : [
             {
@@ -16,7 +20,8 @@ const StreamHandler = () => {
             }  
         ]
     }
-    
+    console.log('Room ID');
+    console.log(RoomId);
     let APP_ID = "e996accb35234d22bf92922376441efb"
     let token = null
 
@@ -30,7 +35,7 @@ const StreamHandler = () => {
     const maxUsers = 7
     const audioVal = true
     //  //later need to create a roomID to get from user
-    let roomID = 'Test room 2'
+    let roomID = RoomId
 
     let localStream
     let localVideoStream
@@ -59,12 +64,9 @@ const StreamHandler = () => {
     }
 
     let leaveChannel = async()=>{
-        console.log("Leave channel was called")
-        members.forEach(member=>{
-            client.sendMessageToPeer({text:JSON.stringify({'type':'Leaving'}),member})
-        })
         await channel.leaveChannel()
         await client.logout()
+        navigate('/');
     }
     
     let initialize=()=>{
@@ -204,9 +206,60 @@ const StreamHandler = () => {
             peerConnection.get(MemberId).setRemoteDescription(answer)
         }
     }
+    let videoON = true;
 
-    
-    return(<>
+    let toggleCamera = async () => {
+        
+        localVideoStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false})
+        if(videoON === true)
+            document.getElementById('user-1').srcObject = null
+        else{
+            document.getElementById('user-1').srcObject = localVideoStream
+        }
+        videoON = !videoON
+        // // let videoTrack = localVideoStream.getTracks().find(track => track.kind === 'video')
+        // // if(videoTrack.enabled){
+        // //     videoTrack.enabled = false
+        // //     localVideo.enabled = false
+        // //     document.getElementById('camera-btn').style.backgroundColor = 'rgb(255, 80, 80)'
+        // // }else{
+        // //     videoTrack.enabled = true
+        // //     localVideo.enabled = true
+        // //     document.getElementById('camera-btn').style.backgroundColor = 'rgb(179, 102, 249, .9)'
+        // // }
+    }
+
+    let toggleMic = async () => {
+        let audioTrack = localStream.getTracks().find(track => track.kind === 'audio')
+
+        if(audioTrack.enabled){
+            audioTrack.enabled = false
+            document.getElementById('mic-btn').style.backgroundColor = 'rgb(255, 80, 80)'
+        }else{
+            audioTrack.enabled = true
+            document.getElementById('mic-btn').style.backgroundColor = 'rgb(179, 102, 249, .9)'
+        }
+    }
+
+    return(
+    <>
+        <div id="controls">
+
+        <div class="control-container" id="camera-btn">
+            <img src={require('./icons/camera.png')} alt='camera button' onClick={toggleCamera}/>
+        </div>
+
+        <div class="control-container" id="mic-btn">
+            <img src={require('./icons/mic.png')} alt='mic button' onClick={toggleMic}/>
+        </div>
+
+        <a href="/videochat/">
+            <div class="control-container" id="leave-btn">
+                <img src={require('./icons/phone.png')} alt='phone button' onClick={leaveChannel}/>
+            </div>
+        </a>
+
+        </div>
     </>
     )
 }
