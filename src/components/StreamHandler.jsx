@@ -24,10 +24,10 @@ const StreamHandler = () => {
 
     let client
     let channel
-    const memIds = new Set([2,3,4,5,6,7,8,9,10])
+    const memIds = new Set([2,3,4,5,6,7])
     const members = new Map([])
     let memberNumber = 1
-    const maxUsers = 10
+    const maxUsers = 7
     const audioVal = true
     //  //later need to create a roomID to get from user
     let roomID = 'Test room 2'

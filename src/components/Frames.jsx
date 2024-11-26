@@ -11,9 +11,6 @@ function Frames() {
       <video className="video-player" id="user-5" autoPlay playsInline></video>
       <video className="video-player" id="user-6" autoPlay playsInline></video>
       <video className="video-player" id="user-7" autoPlay playsInline></video>
-      <video className="video-player" id="user-8" autoPlay playsInline></video>
-      <video className="video-player" id="user-9" autoPlay playsInline></video>
-      <video className="video-player" id="user-10" autoPlay playsInline></video>
     </div>
   );
 }
